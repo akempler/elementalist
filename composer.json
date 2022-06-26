@@ -1,6 +1,6 @@
 {
-    "name": "pantheon-upstreams\/drupal-project",
-    "description": "Install Drupal 9 with Composer on Pantheon.",
+    "name": "akempler/elementalist",
+    "description": "Install Drupal 9 with Composer.",
     "type": "project",
     "license": "MIT",
     "repositories": [
