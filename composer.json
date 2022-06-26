@@ -58,7 +58,7 @@
         "drush-ops/behat-drush-endpoint": "^9.4",
         "drush/drush": "^10",
         "npm-asset/select2": "^4.0",
-        "oomphinc/composer-installers-extender": "^2.0",
+        "oomphinc/composer-installers-extender": "^2.0"
     },
     "require-dev": {
         "behat/behat": "^3.10",
