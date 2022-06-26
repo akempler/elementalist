@@ -1,0 +1,100 @@
+name: drupalsite
+recipe: drupal9
+
+config:
+  php: "7.4"
+  webroot: web
+  # database: mysql:8.0
+  database: 'mariadb:10.5'
+  via: nginx
+  xdebug: true
+
+services:
+  appserver:
+    xdebug: true
+    build_as_root:
+      - rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini && pkill -o -USR2 php-fpm
+    run:
+      - composer install
+      # Create the hash_salt
+      - 'mkdir -p .keys'
+      - "head -c 55 < /dev/urandom | base64 | tr '/+' '_-' | tr -d '=' > .keys/hash_salt.txt"
+    overrides:
+      environment:
+        LANDO_HOST_IP: host.docker.internal
+        XDEBUG_CONFIG: client_host=host.docker.internal
+        SIMPLETEST_BASE_URL: "http://drupalsite.lndo.site"
+        SIMPLETEST_DB: "mysql://drupal9:drupal9@database/drupal9"
+        MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", { "chromeOptions": { "args": [ "disable-gpu", "headless", "no-sandbox" ] } }, "http://chromedriver:9515"]'
+        BROWSERTEST_OUTPUT_DIRECTORY: "/app/web/sites/simpletest/browser_output"
+  chrome:
+    type: compose
+    services:
+      image: drupalci/webdriver-chromedriver:production
+      command: chromedriver --log-path=/tmp/chromedriver.log --verbose --whitelisted-ips=
+
+  node:
+    type: node:16
+    run:
+#      - yarn install
+  mailhog:
+    type: mailhog
+    portforward: true
+    hogfrom:
+      - appserver
+
+  database:
+    portforward: 3306
+
+  solr-search:
+    type: solr:8.6
+    core: default
+    portforward: true
+    config:
+      dir: config/solr-conf/search
+    overrides:
+      environment:
+        LANDO_SOLR_DATADIR: /var/solr/data
+
+tooling:
+  dbsync:
+    service: appserver
+    cmd: sh scripts/sync.sh
+  php:
+    service: appserver
+  gulp:
+    service: node
+  yarn:
+    service: node
+  npm:
+    service: node
+  phpcs:
+    service: appserver
+    cmd: vendor/bin/phpcs --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,css,info,txt,md --ignore=node_modules,bower_components,vendor,dist
+  phpunit:
+    service: appserver
+    cmd: vendor/bin/phpunit
+  drush:
+    service: appserver
+    env:
+      DRUSH_OPTIONS_URI: "http://drupalsite.lndo.site"
+  test:
+    service: appserver
+    cmd: "php /app/vendor/bin/phpunit -c /app/phpunit.xml"
+  xdebug-on:
+    service: appserver
+    description: Enable xdebug for nginx.
+    cmd:
+      - rm /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini -f
+      - docker-php-ext-enable xdebug
+      - pkill -o -USR2 php-fpm
+      - echo "Xdebug enabled"
+    user: root
+  xdebug-off:
+    service: appserver
+    description: Disable xdebug for nginx.
+    cmd:
+      - rm /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini -f
+      - pkill -o -USR2 php-fpm
+      - echo "Xdebug disabled"
+    user: root
