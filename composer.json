@@ -132,12 +132,6 @@
             "web/modules/contrib/{$name}": [
                 "type:drupal-module"
             ],
-            "web/profiles/contrib/elemental_profile": [
-                "akempler/elemental_profile"
-            ],
-            "web/profiles/contrib/{$name}": [
-                "type:drupal-profile"
-            ],
             "web/themes/contrib/{$name}": [
                 "type:drupal-theme"
             ],
@@ -147,8 +141,8 @@
             "web/modules/custom/{$name}": [
                 "type:drupal-custom-module"
             ],
-            "web/profiles/custom/{$name}": [
-                "type:drupal-custom-profile"
+            "web/profiles/{$name}": [
+                "type:drupal-profile"
             ],
             "web/themes/custom/{$name}": [
                 "type:drupal-custom-theme"
