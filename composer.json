@@ -95,9 +95,6 @@
     "prefer-stable": true,
     "extra": {
         "patches": {
-            "drupal/core": {
-                "CKEditor table properties not clickable due to interaction with jQuery UI dialogs": "https://www.drupal.org/files/issues/2022-02-28/3065095-40.ckeditor-table-prop.patch"
-            }
         },
         "drupal-scaffold": {
             "locations": {
